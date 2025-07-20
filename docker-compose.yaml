@@ -15,7 +15,7 @@ services:
       - INIT_ADMIN_PASSWORD
       - INIT_ADMIN_LOGIN
     ports:
-      - "8080:3000"
+      - "8080:8080"
     volumes:
       - ./environment.yaml:/app/environment/environment.yaml
       - data:/app/data
