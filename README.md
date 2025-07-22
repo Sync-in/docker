@@ -112,9 +112,9 @@ Edit the `environment.yaml` file and update the values as follows:
 auth:
   token:
     access:
-      secret: changeAccessWithStrongSecret
+      secret: "changeAccessWithStrongSecret"
     refresh:
-      secret: changeRefreshWithStrongSecret
+      secret: "changeRefreshWithStrongSecret"
 mysql:
   # Use the MySQL root password as defined in docker-compose.yaml
   url: mysql://root:MySQLRootPassword@mariadb:3306/sync_in
@@ -126,10 +126,12 @@ Then, edit the `docker-compose.yaml` file and make sure the MySQL root password 
 services:
   mariadb:
     environment:
-      MYSQL_ROOT_PASSWORD: MySQLRootPassword
+      MYSQL_ROOT_PASSWORD: "MySQLRootPassword"
 ```
 
 > 🔐 Tip: Use long, randomly generated strings for secrets to ensure proper security.
+
+> ⚠️ Warning: Make sure to wrap your passwords in quotes if they contain special characters.
 
 ### 2. Launch the Sync-in server
 
