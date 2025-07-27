@@ -3,7 +3,7 @@ services:
     profiles: [ "releases" ]
     image: syncin/desktop-releases:latest
     container_name: sync-in-desktop-releases
-    user: "8888:8888"
+    user: "${PUID:-8888}:${PGID:-8888}"
     volumes:
       - desktop_releases:/releases:ro
     restart: "no"

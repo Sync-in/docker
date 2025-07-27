@@ -16,7 +16,6 @@ _Welcome to the official Sync-in Docker repository!_
 <a href="https://liberapay.com/sync-in/donate" target="_blank"><img src="https://img.shields.io/badge/Donate-LiberaPay-yellow.svg" alt="LiberaPay"/></a>
 <a href="https://discord.gg/qhJyzwaymT" target="_blank"><img src="https://img.shields.io/badge/Discord-Online-brightgreen.svg" alt="Discord"/></a>
 
-
 **Sync-in** can be installed using the official Sync-in Docker image.  
 This [official image](https://hub.docker.com/r/syncin/server) is designed to be used in **docker compose setup**.
 
@@ -26,15 +25,16 @@ This [official image](https://hub.docker.com/r/syncin/server) is designed to be 
 
 - [Requirements](#-requirements)
     - [Docker](#-docker)
-    - [Setup Files](#-setup-files)
+    - [Setup files](#-setup-files)
 - [QuickStart](#-quickstart)
     - [1. Default secrets](#1-default-secrets)
     - [2. Launch the Sync-in server](#2-launch-the-sync-in-server)
     - [3. Access the web interface](#3-access-the-web-interface)
 - [Configuration](#-configuration)
-    - [Nginx](#nginx)
+    - [Nginx (recommended)](#nginx-recommended)
     - [OnlyOffice (optional)](#onlyoffice-optional)
     - [Client repository (optional)](#clients-repository-optional)
+- [Environment variables](#-environment-variables)
 - [Support](#-support)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -61,7 +61,7 @@ docker compose version
 🔗 If Docker is not installed, follow
 the [official Docker installation guide](https://docs.docker.com/get-started/get-docker/).
 
-### 📦 Setup Files
+### 📦 Setup files
 
 To get the files from this repository, use either:
 
@@ -69,7 +69,8 @@ To get the files from this repository, use either:
   ```bash
   curl -L -o sync-in-docker.zip \
   https://github.com/Sync-in/docker/archive/refs/heads/main.zip && \
-  unzip sync-in-docker.zip
+  unzip sync-in-docker.zip && \
+  mv docker-main sync-in-docker
   ```
 - or `git`:
   ```bash
@@ -131,7 +132,10 @@ services:
 
 > 🔐 Tip: Use long, randomly generated strings for secrets to ensure proper security.
 
-> ⚠️ Warning: Make sure to wrap your passwords in quotes if they contain special characters.
+> ⚠️ Warning: Make sure to wrap your passwords in quotes if they contain **special characters**.
+
+> 💡 You can use **environment variables** to configure the secrets previously defined. See
+> the [Environment variables](#-environment-variables) section for more details.
 
 ### 2. Launch the Sync-in server
 
@@ -173,7 +177,7 @@ Log in using the administrator credentials you configured in [step 2](#2-launch-
 
 ## 🛠️ Configuration
 
-### Nginx
+### Nginx (recommended)
 
 In a production setup, a **reverse proxy** helps ensure secure and efficient access to your Sync-in instance.
 
@@ -265,6 +269,50 @@ To enable this feature or update the releases, you need to run the following com
 chmod +x ./config/sync-in-desktop-releases/update.sh
 ./config/sync-in-desktop-releases/update.sh
 ```
+
+---
+
+## 🌱 Environment variables
+
+### During initialization
+
+- **SKIP_INIT** : Skips the initialization step (database migration, admin account creation, permissions update, etc.)
+- **SKIP_INIT_ADMIN** : Skips the admin account creation step during initialization.
+- **INIT_ADMIN_LOGIN** : The username of the admin account to be created during initialization.
+- **INIT_ADMIN_PASSWORD** : The password of the admin account to be created during initialization.
+- **PUID** : Defines the user ID the container should run as (for file ownership and permissions).
+- **PGID** : Defines the group ID the container should run as (useful for shared volume access).
+
+### During execution
+
+All Sync-in server configuration parameters (available [here](https://sync-in.com/docs/setup-guide/server)) can be set
+using environment variables prefixed with `SYC_`.
+
+For example, the following configuration :
+
+```yaml
+auth:
+  token:
+    access:
+      secret: "changeAccessWithStrongSecret"
+    refresh:
+      secret: "changeRefreshWithStrongSecret"
+mysql:
+  url: mysql://root:MySQLRootPassword@mariadb:3306/sync_in
+```
+
+Can be replicated with environment variables as follows:
+
+```bash
+SYC_AUTH_TOKEN_ACCESS_SECRET="changeAccessWithStrongSecret"
+SYC_AUTH_TOKEN_REFRESH_SECRET="changeAccessWithStrongSecret"
+SYC_MYSQL_URL="mysql://root:MySQLRootPassword@mariadb:3306/sync_in"
+```
+
+> ℹ️ For boolean values, use `true` or `false`
+
+> ℹ️ Numeric values are parsed automatically
+
 ---
 
 ## 💛 Support
@@ -276,17 +324,17 @@ If you find it useful, you can:
 - 🐛 Report issues and suggest improvements
 - 🤝 Contribute code, translations, or documentation
 - 💬 Join the community on :
-  - [Discord](https://discord.gg/qhJyzwaymT)
-  - [Stack Overflow](https://stackoverflow.com/questions/tagged/sync-in)
+    - [Discord](https://discord.gg/qhJyzwaymT)
+    - [Stack Overflow](https://stackoverflow.com/questions/tagged/sync-in)
 - 💖 Support the project via :
-  - [Paypal](https://www.paypal.com/donate/?business=HU3F3CMDDH7YJ&no_recurring=0&item_name=I+rely+on+your+donations+to+grow+the+Sync-in+open+source+project.+Thank+you+for+your+support+%E2%80%94+it+truly+makes+a+difference%21&currency_code=EUR)
-  - [Liberapay](https://liberapay.com/sync-in)
-  - [Patreon](https://www.patreon.com/sync_in)
-  
+    - [Paypal](https://www.paypal.com/donate/?business=HU3F3CMDDH7YJ&no_recurring=0&item_name=I+rely+on+your+donations+to+grow+the+Sync-in+open+source+project.+Thank+you+for+your+support+%E2%80%94+it+truly+makes+a+difference%21&currency_code=EUR)
+    - [Liberapay](https://liberapay.com/sync-in)
+    - [Patreon](https://www.patreon.com/sync_in)
 
 ---
 
 ## 🤝 Contributing
+
 Before submitting your pull request, please confirm the following:
 
 - ✅ I have read and followed the [contribution guide](readme/CONTRIBUTING.md).
