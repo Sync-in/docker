@@ -6,14 +6,14 @@
 name: sync-in
 services:
   sync_in:
-    image: syncin/server:latest
+    image: syncin/server:1
     container_name: sync-in
     restart: always
-    working_dir: /app
-    user: "8888:8888"
     environment:
       - INIT_ADMIN_PASSWORD
       - INIT_ADMIN_LOGIN
+      - PUID=${PUID:-8888}
+      - PGID=${PGID:-8888}
     ports:
       - "8080:8080"
     volumes:
