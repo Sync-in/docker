@@ -35,6 +35,8 @@ This [official image](https://hub.docker.com/r/syncin/server) is designed to be 
     - [OnlyOffice (optional)](#onlyoffice-optional)
     - [Client repository (optional)](#clients-repository-optional)
 - [Environment variables](#-environment-variables)
+- [Managing Docker Secrets](#-managing-docker-secrets)
+- [Useful commands](#-useful-commands)
 - [Support](#-support)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -286,7 +288,7 @@ chmod +x ./config/sync-in-desktop-releases/update.sh
 ### During execution
 
 All Sync-in server configuration parameters (available [here](https://sync-in.com/docs/setup-guide/server)) can be set
-using environment variables prefixed with `SYC_`.
+using environment variables prefixed with `SYNCIN_`.
 
 For example, the following configuration :
 
@@ -304,14 +306,68 @@ mysql:
 Can be replicated with environment variables as follows:
 
 ```bash
-SYC_AUTH_TOKEN_ACCESS_SECRET="changeAccessWithStrongSecret"
-SYC_AUTH_TOKEN_REFRESH_SECRET="changeAccessWithStrongSecret"
-SYC_MYSQL_URL="mysql://root:MySQLRootPassword@mariadb:3306/sync_in"
+SYNCIN_AUTH_TOKEN_ACCESS_SECRET="changeAccessWithStrongSecret"
+SYNCIN_AUTH_TOKEN_REFRESH_SECRET="changeAccessWithStrongSecret"
+SYNCIN_MYSQL_URL="mysql://root:MySQLRootPassword@mariadb:3306/sync_in"
 ```
 
-> ℹ️ For boolean values, use `true` or `false`
+> ℹ️ **Info**  
+> For boolean values, use `true` or `false`.  
+> Numeric values are parsed automatically.
 
-> ℹ️ Numeric values are parsed automatically
+---
+
+## 🔐 Managing Docker Secrets
+
+Docker Secrets, particularly in **Swarm** or **Compose** environments, provide a secure way to store sensitive data (such as passwords, API keys,
+etc.) by mounting them into containers as files, typically located in the `/run/secrets/<secret_name>` directory.
+
+By design, Docker never directly exposes these secrets as environment variables, in order to reduce the risk of leakage (for example, via
+*docker inspect* or environment variables accessible by the process).  
+The Sync-in Docker image, like many official images (MySQL, PostgreSQL, etc.), adopts and supports the `*_FILE` convention.
+
+For example, instead of defining the environment variable `SYNCIN_MYSQL_URL` directly, it is recommended to use  
+`SYNCIN_MYSQL_URL_FILE=/run/secrets/mysql_password`. The Sync-in server will then read the contents of the specified file to initialize the
+corresponding variable internally.
+
+This approach ensures secure secret handling while maintaining compatibility with existing configuration mechanisms.
+
+For more information, refer to the [official Docker documentation](https://docs.docker.com/compose/how-tos/use-secrets/) on secret management.
+
+---
+
+## 🧾 Useful Commands
+
+These commands should be run from the root of the `sync-in-docker` directory, within the Sync-in Docker Compose environment.
+
+#### Start the services
+Starts all services defined in `docker-compose.yml` in detached mode.
+```bash
+docker compose up -d
+```
+
+#### Stop and clean up the services
+Stops all services and removes associated containers, networks, and volumes.
+```bash
+docker compose down
+```
+
+#### Update the Sync-in image
+Pulls the latest version of the Sync-in image, restarts the services, and prunes unused images.
+```bash
+docker compose pull sync_in && docker compose up -d && docker image prune -f
+```
+
+#### View logs
+Displays real-time logs from all services.
+```bash
+docker compose logs -f --tail 100
+```
+
+View logs for a specific service (e.g., Sync-in):
+```bash
+docker compose logs -f --tail 100 sync_in
+```
 
 ---
 
