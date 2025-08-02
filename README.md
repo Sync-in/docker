@@ -143,7 +143,7 @@ services:
 To define your own administrator credentials on first launch, use:
 
 ```bash
-INIT_ADMIN_LOGIN='user' INIT_ADMIN_PASSWORD='password' docker compose up -d
+INIT_ADMIN=true INIT_ADMIN_LOGIN='user' INIT_ADMIN_PASSWORD='password' docker compose up -d
 ```
 
 Replace `user` and `password` with your preferred login and password for the initial admin account.
@@ -151,7 +151,7 @@ Replace `user` and `password` with your preferred login and password for the ini
 If you omit these variables and run:
 
 ```bash
-docker compose up -d
+INIT_ADMIN=true docker compose up -d
 ```
 
 The server will use the **default administrator credentials**:
@@ -278,7 +278,8 @@ chmod +x ./config/sync-in-desktop-releases/update.sh
 ### During initialization
 
 - **SKIP_INIT** : Skips the initialization step (database migration, admin account creation, permissions update, etc.)
-- **SKIP_INIT_ADMIN** : Skips the admin account creation step during initialization.
+- **INIT_ADMIN** : If defined (set to `true` or any non-empty value), forces the creation of the administrator account
+  during initialization.
 - **INIT_ADMIN_LOGIN** : The username of the admin account to be created during initialization.
 - **INIT_ADMIN_PASSWORD** : The password of the admin account to be created during initialization.
 - **PUID** : Defines the user ID the container should run as (for file ownership and permissions).
@@ -318,52 +319,67 @@ SYNCIN_MYSQL_URL="mysql://root:MySQLRootPassword@mariadb:3306/sync_in"
 
 ## 🔐 Managing Docker Secrets
 
-Docker Secrets, particularly in **Swarm** or **Compose** environments, provide a secure way to store sensitive data (such as passwords, API keys,
+Docker Secrets, particularly in **Swarm** or **Compose** environments, provide a secure way to store sensitive data (
+such as passwords, API keys,
 etc.) by mounting them into containers as files, typically located in the `/run/secrets/<secret_name>` directory.
 
-By design, Docker never directly exposes these secrets as environment variables, in order to reduce the risk of leakage (for example, via
+By design, Docker never directly exposes these secrets as environment variables, in order to reduce the risk of
+leakage (for example, via
 *docker inspect* or environment variables accessible by the process).  
-The Sync-in Docker image, like many official images (MySQL, PostgreSQL, etc.), adopts and supports the `*_FILE` convention.
+The Sync-in Docker image, like many official images (MySQL, PostgreSQL, etc.), adopts and supports the `*_FILE`
+convention.
 
 For example, instead of defining the environment variable `SYNCIN_MYSQL_URL` directly, it is recommended to use  
-`SYNCIN_MYSQL_URL_FILE=/run/secrets/mysql_password`. The Sync-in server will then read the contents of the specified file to initialize the
+`SYNCIN_MYSQL_URL_FILE=/run/secrets/mysql_password`. The Sync-in server will then read the contents of the specified
+file to initialize the
 corresponding variable internally.
 
 This approach ensures secure secret handling while maintaining compatibility with existing configuration mechanisms.
 
-For more information, refer to the [official Docker documentation](https://docs.docker.com/compose/how-tos/use-secrets/) on secret management.
+For more information, refer to the [official Docker documentation](https://docs.docker.com/compose/how-tos/use-secrets/)
+on secret management.
 
 ---
 
 ## 🧾 Useful Commands
 
-These commands should be run from the root of the `sync-in-docker` directory, within the Sync-in Docker Compose environment.
+These commands should be run from the root of the `sync-in-docker` directory, within the Sync-in Docker Compose
+environment.
 
 #### Start the services
+
 Starts all services defined in `docker-compose.yml` in detached mode.
+
 ```bash
 docker compose up -d
 ```
 
 #### Stop and clean up the services
+
 Stops all services and removes associated containers, networks, and volumes.
+
 ```bash
 docker compose down
 ```
 
 #### Update the Sync-in image
+
 Pulls the latest version of the Sync-in image, restarts the services, and prunes unused images.
+
 ```bash
 docker compose pull sync_in && docker compose up -d && docker image prune -f
 ```
 
 #### View logs
+
 Displays real-time logs from all services.
+
 ```bash
 docker compose logs -f --tail 100
 ```
 
 View logs for a specific service (e.g., Sync-in):
+
 ```bash
 docker compose logs -f --tail 100 sync_in
 ```

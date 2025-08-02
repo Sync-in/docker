@@ -10,6 +10,7 @@ services:
     container_name: sync-in
     restart: always
     environment:
+      - INIT_ADMIN
       - INIT_ADMIN_PASSWORD
       - INIT_ADMIN_LOGIN
       - PUID=${PUID:-8888}
